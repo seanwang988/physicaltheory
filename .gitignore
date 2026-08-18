@@ -1,0 +1,25 @@
+.DS_Store
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Node
+node_modules/
+dist/
+coverage/
+.playwright-cli/
+output/playwright/
+
+# Local configuration
+.env
+.env.local
+
+# CocoIndex Code (ccc)
+/.cocoindex_code/
