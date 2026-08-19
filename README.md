@@ -45,7 +45,18 @@
 - 电磁学：静电学、静磁学、电动力学；
 - 热学：分子动理论、热力学、统计物理。
 
-静力学和动力学已经提供首批示例内容，包括理论介绍、核心公式、实际应用，以及可调节合外力和质量的交互式运动实验。其余节点已经进入内容目录，可以在后续迭代中逐个完善。
+动力学已经提供首批示例内容，包括理论介绍、核心公式、实际应用，以及可调节合外力和质量的交互式运动实验。其余学科节点已经进入内容目录，可以在后续迭代中逐个完善。
+
+静力学已扩展为包含独立理论页面的专题模块：
+
+- 力的合成与分解：力桌矢量合成实验；
+- 受力分析与平衡：双绳悬挂张力实验；
+- 力矩与力偶：可调杠杆平衡实验；
+- 重心与稳定性：支撑边界与倾覆实验；
+- 静摩擦与自锁：可调摩擦系数斜面实验；
+- 结构与桁架平衡：三角桁架载荷实验。
+
+每个理论页面均包含分节原理讲解、力学公式、可操作实验动画、实际应用案例、相关科学家介绍和关联理论导航。理论页面使用 `/theories/{theory-id}` 独立地址，可以直接访问和分享。
 
 ### 内容设计原则
 
@@ -191,7 +202,18 @@ The current version provides an extensible full-stack foundation and a structure
 - **Electromagnetism:** electrostatics, magnetostatics, and electrodynamics;
 - **Thermal physics:** kinetic theory, thermodynamics, and statistical physics.
 
-Statics and dynamics include the first sample lessons, with theory sections, core equations, real-world applications, and an interactive motion experiment where users can adjust net force and mass. The remaining topics are already represented in the catalog and can be developed incrementally.
+Dynamics includes the first sample lesson, with theory sections, core equations, real-world applications, and an interactive motion experiment where users can adjust net force and mass. The remaining discipline nodes are represented in the catalog and can be developed incrementally.
+
+Statics has been expanded into a complete topic module with six standalone theory pages:
+
+- force composition and decomposition, with an interactive force-table experiment;
+- free-body analysis and equilibrium, with a two-cable tension experiment;
+- moments and couples, with an adjustable lever experiment;
+- center of gravity and stability, with a tipping-boundary experiment;
+- static friction and self-locking, with an adjustable inclined-plane experiment;
+- structural and truss equilibrium, with a triangular-truss load experiment.
+
+Every theory page includes layered explanations, mechanics formulas, an interactive experiment, real-world applications, scientist profiles, and navigation to related theories. Pages use standalone `/theories/{theory-id}` URLs so they can be opened and shared directly.
 
 ### Content Design Principles
 

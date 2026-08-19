@@ -1,19 +1,28 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import { api } from './api'
 import DisciplineMap from './components/DisciplineMap.vue'
+import StaticsTheoryPage from './components/StaticsTheoryPage.vue'
 import SubjectPanel from './components/SubjectPanel.vue'
-import type { Discipline, SubjectDetail, SubjectNode } from './types'
+import type { Discipline, SubjectDetail, SubjectNode, TheoryDetail, TheoryNode } from './types'
 
 const disciplines = ref<Discipline[]>([])
 const selectedDiscipline = ref<Discipline | null>(null)
 const selectedSubject = ref<SubjectNode | null>(null)
 const detail = ref<SubjectDetail | null>(null)
+const theoryDetail = ref<TheoryDetail | null>(null)
 const isLoading = ref(true)
 const error = ref('')
 
 const selectedSubjectId = computed(() => selectedSubject.value?.id ?? null)
+const staticsTheoryIndex = computed(() =>
+  detail.value?.id === 'statics' ? detail.value.theories : [],
+)
+
+function theoryIdFromPath() {
+  return window.location.pathname.match(/^\/theories\/([a-z0-9-]+)\/?$/)?.[1] ?? null
+}
 
 async function loadCatalog() {
   isLoading.value = true
@@ -21,8 +30,16 @@ async function loadCatalog() {
   try {
     disciplines.value = await api.listDisciplines()
     const mechanics = disciplines.value.find((item) => item.id === 'mechanics')
+    const statics = mechanics?.subjects.find((item) => item.id === 'statics')
     const dynamics = mechanics?.subjects.find((item) => item.id === 'dynamics')
-    if (mechanics && dynamics) await selectSubject(mechanics, dynamics)
+    const routeTheoryId = theoryIdFromPath()
+
+    if (routeTheoryId && mechanics && statics) {
+      await selectSubject(mechanics, statics, false)
+      await openTheoryById(routeTheoryId, false)
+    } else if (mechanics && dynamics) {
+      await selectSubject(mechanics, dynamics, false)
+    }
   } catch {
     error.value = '无法连接内容服务。请确认 Python API 已在 8000 端口启动。'
   } finally {
@@ -30,11 +47,16 @@ async function loadCatalog() {
   }
 }
 
-async function selectSubject(discipline: Discipline, subject: SubjectNode) {
+async function selectSubject(discipline: Discipline, subject: SubjectNode, updateHistory = true) {
   selectedDiscipline.value = discipline
   selectedSubject.value = subject
   detail.value = null
+  theoryDetail.value = null
   error.value = ''
+
+  if (updateHistory && window.location.pathname !== '/') {
+    window.history.pushState({}, '', '/')
+  }
 
   if (subject.status === 'planned') {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -49,24 +71,80 @@ async function selectSubject(discipline: Discipline, subject: SubjectNode) {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-onMounted(loadCatalog)
+async function openTheoryById(theoryId: string, updateHistory = true) {
+  error.value = ''
+  try {
+    theoryDetail.value = await api.getTheory(theoryId)
+    if (updateHistory && window.location.pathname !== `/theories/${theoryId}`) {
+      window.history.pushState({}, '', `/theories/${theoryId}`)
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  } catch {
+    theoryDetail.value = null
+    error.value = '理论页面读取失败，请确认链接是否正确。'
+  }
+}
+
+function openTheory(theory: TheoryNode) {
+  void openTheoryById(theory.id)
+}
+
+async function backToStatics() {
+  const mechanics = disciplines.value.find((item) => item.id === 'mechanics')
+  const statics = mechanics?.subjects.find((item) => item.id === 'statics')
+  if (!mechanics || !statics) return
+
+  await selectSubject(mechanics, statics)
+  requestAnimationFrame(() => {
+    document.querySelector('.statics-catalog')?.scrollIntoView({ behavior: 'smooth' })
+  })
+}
+
+function goHome() {
+  theoryDetail.value = null
+  if (window.location.pathname !== '/') window.history.pushState({}, '', '/')
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function handlePopState() {
+  const theoryId = theoryIdFromPath()
+  if (theoryId) void openTheoryById(theoryId, false)
+  else theoryDetail.value = null
+}
+
+onMounted(() => {
+  window.addEventListener('popstate', handlePopState)
+  void loadCatalog()
+})
+
+onBeforeUnmount(() => window.removeEventListener('popstate', handlePopState))
 </script>
 
 <template>
   <div class="app-shell">
     <header class="site-header">
-      <a class="brand" href="#top" aria-label="返回首页">
+      <a class="brand" href="/" aria-label="返回首页" @click.prevent="goHome">
         <span class="brand__mark"><i /><i /><i /></span>
         <span><strong>物理原场</strong><small>PHYSICAL THEORY</small></span>
       </a>
       <div class="site-header__meta">
-        <span>交互式物理图谱</span>
+        <span>{{ theoryDetail ? '静力学理论专题' : '交互式物理图谱' }}</span>
         <i />
         <span>V0.1</span>
       </div>
     </header>
 
     <main id="top">
+      <StaticsTheoryPage
+        v-if="theoryDetail"
+        :key="theoryDetail.id"
+        :theory="theoryDetail"
+        :theory-index="staticsTheoryIndex"
+        @back="backToStatics"
+        @open-theory="openTheory"
+      />
+
+      <template v-else>
       <section class="catalog-hero">
         <div class="catalog-hero__copy">
           <p class="eyebrow"><span>EXPLORE THE LAWS</span><i /><span>理解世界的运行方式</span></p>
@@ -98,6 +176,7 @@ onMounted(loadCatalog)
         :key="detail.id"
         :discipline="selectedDiscipline"
         :detail
+        @open-theory="openTheory"
       />
       <section v-else-if="selectedSubject" class="coming-soon">
         <span>CONTENT IN PROGRESS</span>
@@ -105,6 +184,7 @@ onMounted(loadCatalog)
         <p>{{ selectedSubject.summary }}</p>
         <div>该节点的理论文章、动画与应用案例将在后续迭代中加入。</div>
       </section>
+      </template>
     </main>
 
     <footer>

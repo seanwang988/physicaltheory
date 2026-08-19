@@ -1,10 +1,15 @@
 <script setup lang="ts">
-import type { Discipline, SubjectDetail } from '../types'
+import type { Discipline, SubjectDetail, TheoryNode } from '../types'
 import ForceMotionLab from './ForceMotionLab.vue'
+import StaticsTheoryCatalog from './StaticsTheoryCatalog.vue'
 
 defineProps<{
   discipline: Discipline
   detail: SubjectDetail
+}>()
+
+const emit = defineEmits<{
+  openTheory: [theory: TheoryNode]
 }>()
 </script>
 
@@ -19,6 +24,12 @@ defineProps<{
       <h1>{{ detail.name }}</h1>
       <p>{{ detail.introduction }}</p>
     </header>
+
+    <StaticsTheoryCatalog
+      v-if="detail.theories.length"
+      :theories="detail.theories"
+      @open-theory="emit('openTheory', $event)"
+    />
 
     <section class="content-block">
       <div class="section-heading">

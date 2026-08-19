@@ -1,4 +1,4 @@
-import type { Discipline, SubjectDetail } from './types'
+import type { Discipline, SubjectDetail, TheoryDetail, TheoryNode } from './types'
 
 class ApiError extends Error {
   constructor(
@@ -21,4 +21,7 @@ async function request<T>(path: string): Promise<T> {
 export const api = {
   listDisciplines: () => request<Discipline[]>('/api/disciplines'),
   getSubject: (subjectId: string) => request<SubjectDetail>(`/api/subjects/${subjectId}`),
+  listTheories: (subjectId: string) =>
+    request<TheoryNode[]>(`/api/subjects/${subjectId}/theories`),
+  getTheory: (theoryId: string) => request<TheoryDetail>(`/api/theories/${theoryId}`),
 }

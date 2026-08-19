@@ -1,5 +1,7 @@
 from app.models import AnimationSpec, Discipline, Formula, SubjectDetail, SubjectNode, TheorySection
 
+from .statics_theories import STATICS_THEORY_NODES
+
 
 def node(
     node_id: str,
@@ -127,6 +129,7 @@ DETAILS = {
             description="调节推力和质量，观察物体加速度变化；将推力归零可模拟平衡状态。",
             controls=["force", "mass"],
         ),
+        theories=STATICS_THEORY_NODES,
     ),
     "dynamics": SubjectDetail(
         **next(
